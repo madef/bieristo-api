@@ -1,0 +1,35 @@
+version: '3.0'
+
+services:
+  bieristo_api:
+    container_name: bieristo_api
+    build: images/php
+    restart: always
+    depends_on:
+      - bieristo_mongodb
+    links:
+      - "bieristo_mongodb:mongodb"
+    volumes:
+      - ../logs:/var/www/logs
+      - ../api:/var/www/html
+      - ../class:/var/www/class
+      - ./php/config.php:/var/www/config.php
+      - ../script:/var/www/script
+      - ../vendor:/var/www/vendor
+      - ../composer.phar:/var/www/composer.phar
+      - ../composer.json:/var/www/composer.json
+      - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - 'web'
+  bieristo_mongodb:
+    container_name: bieristo_mongodb
+    image: mongo:5
+    restart: always
+    volumes:
+      - ./mongodb/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./mongodb/data:/data/db
+    networks:
+      - 'web'
+networks:
+  web:
+    external: true

@@ -1,0 +1,21 @@
+version: '3.0'
+
+services:
+  bieristo_api:
+    env_file:
+      - ./env/development
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.bieristo_api-http.entrypoints: "http"
+      traefik.http.routers.bieristo_api-http.rule: "Host(`api.bieristo.local`)"
+      traefik.http.middlewares.bieristo_api-https.redirectscheme.scheme: "https"
+      traefik.http.routers.bieristo_api-http.middlewares: "redirect@file"
+      traefik.http.routers.bieristo_api-https.entrypoints: "https"
+      traefik.http.routers.bieristo_api-https.rule: "Host(`api.bieristo.local`)"
+      traefik.http.routers.bieristo_api-https.tls: "true"
+  bieristo_mongodb:
+    env_file:
+      - ./env/development
+networks:
+  web:
+    external: true

@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * Params:
+ *  - email
+ *  - password
+ *
+ * Response:
+ *  - status: true success, false error
+ *  - (token)
+ *  - (target)
+ *  - (reason)
+ */
+
+require('../../config.php');
+require('../../vendor/autoload.php');
+
+$userRepository = \Bieristo\Model\UserRepository::getInstance();
+
+$request = new \Bieristo\Api\Request;
+
+$response = new \Bieristo\Api\Response();
+try {
+    if ($request->empty('email')) {
+        throw (new \Bieristo\Exception\MissingParameterException('Missing email'))->setTarget('email');
+    }
+
+    if ($request->empty('password')) {
+        throw (new \Bieristo\Exception\MissingParameterException('Missing password'))->setTarget('password');
+    }
+
+    $email = $request->get('email');
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw (new \Bieristo\Exception\InvalidFormatException('Invalid email format'))->setTarget('email');
+    }
+
+    // Validate password strength
+    $password = $request->get('password');
+    $uppercase = preg_match('@[A-Z]@', $password);
+    $lowercase = preg_match('@[a-z]@', $password);
+    $number = preg_match('@[0-9]@', $password);
+    $specialChars = preg_match('@[^\w]@', $password);
+
+    if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+        throw (
+            new \Bieristo\Exception\InvalidFormatException(
+                'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.'
+            )
+        )->setTarget('password');
+    }
+
+    try {
+        $user = $userRepository->getUserByEmail($email);
+
+        throw new \Bieristo\Exception\EntityAlreadyExistsException('User already exists');
+    } catch (\Bieristo\Exception\NoSuchEntityException $e) {
+        // Nothig to do
+    }
+
+    $user = $userRepository->getEmptyUser();
+    $user->setEmail($email);
+    $user->setPasswordHash(new \Bieristo\Helper\PasswordHash($password));
+    $token = new \Bieristo\Helper\TokenGenerator();
+    $user->setToken($token);
+
+    $userRepository->save($user);
+
+    $response->set('token', (string) $token);
+    $response->set('status', true);
+} catch (\Bieristo\Exception\MissingParameterException $e) {
+    $response->set('status', false);
+    $response->set('reason', $e->getMessage());
+    $response->set('target', $e->getTarget());
+} catch (\Bieristo\Exception\InvalidFormatException $e) {
+    $response->set('status', false);
+    $response->set('reason', $e->getMessage());
+    $response->set('target', $e->getTarget());
+} catch (\Bieristo\Exception\EntityAlreadyExistsException $e) {
+    $response->set('status', false);
+    $response->set('reason', $e->getMessage());
+} catch (\Exception $e) {
+    $response->set('status', false);
+    $response->set('reason', 'Technical problem');
+}
+
+$response->send();
+

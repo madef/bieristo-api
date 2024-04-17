@@ -1,0 +1,11 @@
+{
+    "require": {
+        "snipworks/php-smtp": "^2.0",
+        "mongodb/mongodb": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bieristo\\": "class/"
+        }
+    }
+}

@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * Params:
+ *  - email
+ *  - password
+ *
+ * Response:
+ *  - status: true token is valid, false token not valid
+ *  - (token)
+ *  - (reason)
+ *  - (code)
+ */
+
+require('../../config.php');
+require('../../vendor/autoload.php');
+
+$userRepository = \Bieristo\Model\UserRepository::getInstance();
+
+$request = new \Bieristo\Api\Request;
+
+$response = new \Bieristo\Api\Response();
+
+try {
+    if ($request->empty('email')) {
+        throw (new \Bieristo\Exception\MissingParameterException('Missing email'))->setTarget('email');
+    }
+
+    if ($request->empty('password')) {
+        throw (new \Bieristo\Exception\MissingParameterException('Missing password'))->setTarget('password');
+    }
+
+    $user = $userRepository->getUserByEmail($request->get('email'));
+
+    if (!password_verify($request->get('password'), $user->getPasswordHash())) {
+        throw new \Bieristo\Exception\NoSuchEntityException();
+    }
+
+    $response->set('token', (string) $token);
+    $response->set('status', true);
+} catch (\Bieristo\Exception\MissingParameterException $e) {
+    $response->set('status', false);
+    $response->set('code', 0);
+    $response->set('reason', $e->getMessage());
+    $response->set('target', $e->getTarget());
+} catch (\Bieristo\Exception\NoSuchEntityException $e) {
+    $response->set('status', false);
+    $response->set('code', 1);
+    $response->set('reason', 'User do not exists or password is invalid.');
+} catch (\Exception $e) {
+    $response->set('code', 0);
+    $response->set('status', false);
+    $response->set('reason', 'Technical problem');
+}
+
+$response->set('debug', $_GET);
+$response->send();
+
