@@ -12,7 +12,7 @@ First install docker:
 yay docker
 ```
 
-You can find more information about treafik here : https://www.digitalocean.com/community/tutorials/how-to-use-traefik-v2-as-a-reverse-proxy-for-docker-containers-on-ubuntu-20-04
+You can use this container if you dont have traefik : https://github.com/madef/traefik
 
 ## Get the projet and set configurations files
 
