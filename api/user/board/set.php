@@ -271,7 +271,7 @@ function processHeatUnit(&$unitList, $key, $unitData, $user, $boardId) {
         $unit->setT2($unitData['t2']);
     }
 
-    if (!empty($unitData['planner']) || $unitData['planner'] === '0') {
+    if (!empty($unitData['planner']) || isset($unitData['planner']) && $unitData['planner'] === '0') {
         if (isset($unitData['planner']['askStatus'])) {
             if (false === filter_var($unitData['planner']['askStatus'], FILTER_VALIDATE_INT) || $unitData['planner']['askStatus'] > 5 || $unitData['planner']['askStatus'] < 0) {
                 throw (new \Bieristo\Exception\InvalidFormatException('Invalid format. Numeric required.'))->setTarget('unit.'.$key.'planner.askStatus');

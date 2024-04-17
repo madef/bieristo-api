@@ -11,6 +11,7 @@ class Mongo
     protected $db;
     protected $manager;
     protected $client;
+    protected $bulkCollection = [];
 
     protected function __construct()
     {

@@ -121,7 +121,7 @@ class HeatUnit extends Unit
         $data['temperature'] = $this->getTemperature();
         $data['t1'] = $this->getT1();
         $data['t2'] = $this->getT2();
-        $data['planner'] = $this->getPlanner()->getData();
+        $data['planner'] = $this->getPlanner() ? $this->getPlanner()->getData() : null;
 
         return $data;
     }

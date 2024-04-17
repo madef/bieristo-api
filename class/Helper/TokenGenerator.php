@@ -8,7 +8,7 @@ class TokenGenerator
 
     public function __construct()
     {
-        $this->token = hash('sha256', uniqid(null, true));
+        $this->token = hash('sha256', uniqid('', true));
     }
 
     public function __toString()
